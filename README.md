@@ -40,6 +40,28 @@ DNS1=
 * 关闭防火墙  
 systemctl stop firewalld.service  
 systemctl disable firewalld.service  
+* ssh免密登录  
+ssh-keygen -t rsa，一直回车，直到完成  
+cd ~/.ssh查看，下面已经有id_rsa,id_rsa.pub两个文件，说明成功了  
+然后使用ssh-copy-id -i ~/.ssh/id_rsa.pub master，copy到每一台机器，包括本机  
+上面的步骤在其他的机器上也执行一次  
+然后使用ssh slave1 命令检查是否配置成功  
+
+## 软件安装  
+* jdk安装  
+使用tar -zxvf jdk-8u192-linux-x64.tar.gz解压  
+vim /etc/profile,配置环境变量  
+执行source /etc/profile 命令使环境变量生效  
+输入java ，javac 命令检查是否安装成功  
+* hadoop安装  
+先解压  
+配置环境变量  
+环境变量生效  
+使用hadoop version 检查是否安装成功  
+
+
+
+
 
 
 
