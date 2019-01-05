@@ -1,3 +1,4 @@
 
-#spark集群搭建
-|master|slave1|slave2|slave3|slave4|
+#spark集群搭建<br>
+| master | slave1 | slave2 | slave3 | slave4 | <br>
+| :-- | :-- | :-- | :-- | :-- |
