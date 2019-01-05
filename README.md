@@ -18,6 +18,7 @@ jornalnode|是|是|是|是|是|
 * JDK版本：jdk8 最先使用jdk10 ，但是在部署spark过程中有问题，后来改为jdk8  
 * hadoop版本：hadoop-2.9.2  
 * spark版本：spark-2.0.2-bin-hadoop2.7，最先使用spark-2.3.0-bin-hadoop2.7版本，但是使用过程有问题  
+* scala版本：scala-2.12.8  
 
 
 ## 环境安装  
@@ -52,6 +53,7 @@ cd ~/.ssh查看，下面已经有id_rsa,id_rsa.pub两个文件，说明成功了
 使用tar -zxvf jdk-8u192-linux-x64.tar.gz解压  
 vim /etc/profile,配置环境变量  
 执行source /etc/profile 命令使环境变量生效  
+拷贝到其他机器上，安装一样  
 输入java ，javac 命令检查是否安装成功  
 * hadoop安装  
 1 先解压  
@@ -208,8 +210,78 @@ vim /etc/profile,配置环境变量
                </configuration>
 
 ```
+10 修改slaves，这里配置的是datanode节点，写hostname即可  
+```
+slave1
+slave2
+slave3
 
+```
+11 建立hadoop临时目录hadoop_tmp,与core-site.xml配置的临时目录对应,建立journal目录，用来存放journalnode在本地存放位置，  
+与hdfs-site.xml中配置的目录对应
 
+12 把hadoop拷贝到其他机器上，配置与上面的一致  
+
+* 安装zookeeper  
+解压zookeeper  
+配置环境变量  
+环境变量生效  
+在zookeeper下找到conf目录，在下面有一个zoo_sample.cfgw文件，使用mv zoo-sample.cfg zoo.cfg 命令生成zoo.cfg文件  
+建立zookeeper_data目录  
+修改zoo.cfg文件，dataDir=/software/zookeeper_data，并添加如下配置  
+```
+server.1=master:2888:3888
+server.2=slave1:2888:3888
+server.3=slave2:2888:3888
+server.4=slave3:2888:3888
+server.5=slave4:2888:3888
+
+```
+进入zookeeper_data目录，使用touch myid命令建立myid文件，使用echo 1 > myid命令把1写入myid文件中，这里的数字与上面server.1的配置一一对应，  
+比如master机器就是1，slave1机器就是2  
+
+把zookeeper拷贝到其他的机器上，只需要修改myid中的对应数字就可以了，其他配置一样  
+
+* scala安装  
+解压  
+配置环境变量  
+环境变量生效  
+拷贝到其他机器，配置一样  
+
+* spark安装  
+解压  
+配置环境变量  
+环境变量生效  
+进入spark目录找到conf目录 ，使用命令cp spark-env.sh.template spark-env.sh生成一个spark-env.sh文件  
+修改spark-env.sh文件，配置如下信息  
+```
+export SPARK_MASTER_HOST=master #配置的是spark的master节点机器
+export JAVA_HOME=/software/jdk1.8.0_192
+export SCALA_HOME=/software/scala-2.12.8
+export HADOOP_HOME=/software/hadoop-2.9.2
+export HADOOP_CONF_DIR=/software/hadoop-2.9.2/etc/hadoop #这里配置的是hadoop的配置目录
+export SPARK_HOME=/software/spark-2.0.2-bin-hadoop2.7
+
+```
+
+进入spark目录找到conf目录，使用cp slaves.template slaves 生成一个slaves文件  
+修改slaves文件，这里配置的是spark的worker节点
+```
+slave1
+slave2
+slave3
+
+```
+
+把spark拷贝到其他机器上，配置一致  
+
+* 格式化hdfs，使用命令 hdfs namenode -format，在两个namenode节点上都要执行，也可以执行一台后将hadoop_tmp的信息拷贝到另一台上  
+* 格式化zookeeper ，使用hdfs zkfc -formatZK
+* 开始启动  
+ 1 启动zookeeper ，zkServer.sh start  
+ 2 启动hadoop ，start-all.sh 启动，这个只能启动一个resourcemanager,另一个resourcemanager需要使用  
+ yarn-daemon.sh start resourcemanager来启动  
+ 3 启动spark，进入spark找到sbin目录，使用./start-all.sh来启动spark
 
 
 
